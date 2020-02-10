@@ -1,2 +1,2 @@
 # pid-controller
-PID controllers: Project for Udacity Self-Driving Car Nanodegree
+PID controller: Project for Udacity Self-Driving Car Nanodegree
