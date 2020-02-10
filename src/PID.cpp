@@ -27,8 +27,6 @@ void PID::UpdateError(double cte) {
 }
 
 double PID::TotalError() {
-  /**
-   * TODO: Calculate and return the total error
-   */
-  return 0.0;  // TODO: Add your total error calc here!
+  // Calculate and return the total error
+  return p_error;  // TODO: Add your total error calc here!
 }
