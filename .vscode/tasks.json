@@ -1,0 +1,25 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "cd build && cmake .. && make",
+            "problemMatcher": []
+        },
+        
+        {
+            "label": "run_project",
+            "type": "shell",
+            "command": "./run.sh & ./term2_sim_linux/term2_sim.x86_64 && fg",
+            "problemMatcher": [],
+            "dependsOn": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
