@@ -36,7 +36,6 @@ class PID {
   double MaxError();
 
  private:
-  long long counter;
   /**
    * PID Errors
    */
@@ -52,6 +51,9 @@ class PID {
   double Kp;
   double Ki;
   double Kd;
+
+ public:
+  long long counter;
 };
 
 #endif  // PID_H
