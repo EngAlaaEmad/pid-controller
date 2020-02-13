@@ -37,6 +37,7 @@ int main() {
   std::vector<double> p = {0.229981, 0.000849273, 1.70926};
   pid.Init(p[0], p[1], p[2]);
 
+  // Variables for Twiddle algorithm
   std::vector<double> dp = {0.01, 0.0001, 0.1};
   int i = 0;
   double best_error = 99999.9;
