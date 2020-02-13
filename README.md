@@ -46,9 +46,9 @@ A PID object is instantiated in ```main.cpp``` and used to calculate the current
 
 Parameters were tuned using the "Twiddle" algorithm showed in the Udacity course and implemented in ```main.cpp```. This algorithm involves systematically changing the coefficients one by one, adding or subtracting smaller and smaller amounts until a certain threshoild is reached. I ran the algorithm for 750 timesteps (about a lap) for each set of parameters, until I finally reached the final set of coefficents:
 
-**Kp**: 0.229981
-**Ki**: 0.000849273
-**Kd**: 1.70926
+- **Kp**: 0.229981
+- **Ki**: 0.000849273
+- **Kd**: 1.70926
 
 
 ### Effect of the P, I, D components
