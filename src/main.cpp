@@ -33,23 +33,22 @@ int main() {
   uWS::Hub h;
 
   PID pid;
-  /**
-   * TODO: Initialize the pid variable.
-   */
-  std::vector<double> p = {0.05, 0.0001, 1.0};
-  std::vector<double> dp = p;
-  int i = 0;
-  double best_error = 99999.9;
-  double error = 0.0;
-  bool decreased_dp = false;
-  bool increased_dp = false;
-  bool twiddle = true;
+  // Initialize PID controller
+  std::vector<double> p = {0.229981, 0.000849273, 1.70926};
   pid.Init(p[0], p[1], p[2]);
 
-  h.onMessage([&pid, &p, &dp, &i, &best_error, &error, &decreased_dp,
-               &increased_dp, &twiddle](uWS::WebSocket<uWS::SERVER> ws,
-                                        char *data, size_t length,
-                                        uWS::OpCode opCode) {
+  std::vector<double> dp = {0.01, 0.0001, 0.1};
+  int i = 0;
+  double best_error = 99999.9;
+  double total_error = 0.0;
+  bool tried_decreasing_dp = false;
+  bool twiddle = false;
+  int max_timestep = 750;
+
+  h.onMessage([&pid, &p, &dp, &i, &best_error, &total_error,
+               &tried_decreasing_dp, &twiddle,
+               &max_timestep](uWS::WebSocket<uWS::SERVER> ws, char *data,
+                              size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -68,56 +67,56 @@ int main() {
           double angle = std::stod(j[1]["steering_angle"].get<string>());
           pid.UpdateError(cte);
           double steer_value = -1 * pid.TotalError();
-          /**
-           * TODO: Calculate steering value here, remember the steering value is
-           *   [-1, 1].
-           * NOTE: Feel free to play around with the throttle and speed.
-           *   Maybe use another PID controller to control the speed!
-           */
-          // Twiddle
+          total_error += pow(cte, 2);
 
-          // std::cout << pid.counter << std::endl;
-          // outer while loop for tolerance
+          // Optional Twiddle for parameter tuning
           if (twiddle == true) {
-            if (dp[0] + dp[1] + dp[2] > 0.10) {
-              // do 100 steps w new param
-              if (pid.counter > 750 || cte > 4.0) {
+            if (dp[0] + dp[1] + dp[2] > 0.001) {
+              if (pid.counter > max_timestep) {
+                // debug info
+                std::cout << "-------------------------" << std::endl;
+                std::cout << "i: " << i << std::endl;
                 std::cout << "p: " << p[0] << ", " << p[1] << ", " << p[2]
                           << std::endl;
                 std::cout << "dp: " << dp[0] << ", " << dp[1] << ", " << dp[2]
                           << std::endl;
-                double error = pid.AverageError() + pid.MaxError();
-                // RESET
+
+                // RESET after max timestep is reached
                 std::string reset_msg = "42[\"reset\",{}]";
                 ws.send(reset_msg.data(), reset_msg.length(),
                         uWS::OpCode::TEXT);
-                std::cout << "RESET" << std::endl;
                 pid.counter = 0;
-                // check where to go
-                if (error < best_error) {
-                  best_error = error;
-                  std::cout << "best error: " << best_error << std::endl;
+
+                // check how to change parameters according to error
+                if (total_error < best_error) {
+                  best_error = total_error;
+                  std::cout << "best error: " << total_error << std::endl;
                   dp[i] *= 1.1;
-                  std::cout << "INCREASE" << std::endl;
-                } else if (decreased_dp == false) {
+                  std::cout << "INCREASE dp[" << i << "] "
+                            << "& BUMP UP NEXT" << std::endl;
+                  tried_decreasing_dp = false;
+                } else if (tried_decreasing_dp == false) {
                   p[i] -= 3 * dp[i];
                   i -= 1;  // run with same i once more
-                  decreased_dp = true;
-                  std::cout << "DECREASE" << std::endl;
+                  tried_decreasing_dp = true;
+                  std::cout << "BUMP DOWN p[" << i + 1 << "]" << std::endl;
 
-                } else if (decreased_dp == true) {
+                } else if (tried_decreasing_dp == true) {
                   p[i] += dp[i];  // bump back up
                   dp[i] *= 0.9;
-                  decreased_dp = false;
-                  std::cout << "NARROW" << std::endl;
+                  tried_decreasing_dp = false;
+                  std::cout << "NARROW p[" << i << "] "
+                            << "& BUMP UP NEXT" << std::endl;
                 }
+                total_error = 0;
                 i++;
                 i %= 3;  // keep looping i = 0..2 until tolerance is reached
-                p[i] += dp[i];  // modify p for next n steps
+                p[i] += dp[i];  // modify p with dp for next steps
                 pid.Init(p[0], p[1], p[2]);
               }
             } else {
-              // p[i] -= dp[i]
+              p[i] -= dp[i];
+              pid.Init(p[0], p[1], p[2]);
               std::cout << "Found optimal parameters: " << p[0] << ", " << p[1]
                         << ", " << p[2] << std::endl;
               twiddle = false;
@@ -125,12 +124,11 @@ int main() {
           }
 
           // DEBUG
-          /*std::cout << "CTE: " << cte << " Steering Value: " << steer_value
+          std::cout << "CTE: " << cte << " Steering Value: " << steer_value
                     << std::endl;
           std::cout << "Average Error : " << pid.AverageError() << " ["
                     << pid.MinError() << ", " << pid.MaxError() << "]"
                     << std::endl;
-                    */
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
@@ -148,7 +146,7 @@ int main() {
   });  // end h.onMessage
 
   h.onConnection([&h](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req) {
-    std::cout << "Connected!!!" << std::endl;
+    // std::cout << "Connected!!!" << std::endl;
   });
 
   h.onDisconnection([&h](uWS::WebSocket<uWS::SERVER> ws, int code,
