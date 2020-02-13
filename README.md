@@ -55,9 +55,17 @@ Parameters were tuned using the "Twiddle" algorithm showed in the Udacity course
 
 The effects of the individual components were clearly visible when trying to manually tune the controller:
 
-- The P component is a good first step in trying to keep on the road, but it is hard to stabilize because it either overshoots or does not add enough control.
-- The I component serves to eliminate any bias (e.g. offset in the steering angle) that may be present in the system causing the vehicle's position to be offset from the desired value. The simulator probably doesn't have any such biases, but the I component still helps in stabilizing the vehicle.
-- The D component can help in eliminating the overshooting effect of the P component: when tuned properly, a PD controller will approach the intended value smoothly.
+- The **P component** is a good first step in trying to keep on the road, but it is hard to stabilize because it either overshoots or does not add enough control:
+
+<img src="./images/p.gif" alt="Steering with P control in the Udacity simulator" width="300"/>
+
+- The **D component** can help in eliminating the overshooting effect of the P component: when tuned properly, a PD controller will approach the intended value smoothly:
+
+<img src="./images/pd.gif" alt="Steering with PD control in the Udacity simulator" width="300"/>
+
+- The **I component** serves to eliminate any bias (e.g. offset in the steering angle) that may be present in the system causing the vehicle's position to be offset from the desired value. The simulator probably doesn't have any such biases, but the I component still helps in stabilizing the vehicle:
+
+<img src="./images/pid.gif" alt="Steering with PD control in the Udacity simulator" width="300"/>
 
 
 ## Running the code
