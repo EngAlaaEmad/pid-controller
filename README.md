@@ -29,7 +29,7 @@ The controller is easily visualized in the following block diagram and the equat
 <img src="./images/pid_controller.svg" alt="Block diagram of a PID controller" width="600"/>
 <img src="./images/pid_control_function.png" alt="PID control function" width="300"/>
 
-Where Kp, Ki and Kd denote the coefficients for the proportional, integral, and derivative terms respectively.
+Here Kp, Ki and Kd denote the coefficients for the proportional, integral, and derivative terms respectively.
 
 ### Summary of PID code
 
@@ -44,10 +44,16 @@ A PID object is instantiated in ```main.cpp``` and used to calculate the current
 
 ### Tuning the controller
 
+Parameters were tuned using the "Twiddle" algorithm showed in the Udacity course and implemented in ```main.cpp```. This algorithm involves systematically changing the coefficients one by one, adding or subtracting smaller and smaller amounts until a certain threshoild is reached. I ran the algorithm for 750 timesteps (about a lap) for each set of parameters, until I finally reached the final set of coefficents: Kp: 0.229981, Ki: 0.000849273, Kd: 1.70926
 
 
 ### Effect of the P, I, D components
 
+The effects of the individual components were clearly visible when trying to manually tune the controller:
+
+- The P component is a good first step in trying to keep on the road, but it is hard to stabilize because it either overshoots or does not add enough control.
+- The I component serves to eliminate any bias (e.g. offset in the steering angle) that may be present in the system causing the vehicle's position to be offset from the desired value. The simulator probably doesn't have any such biases, but the I component still helps in stabilizing the vehicle.
+- The D component can help in eliminating the overshooting effect of the P component: when tuned properly, a PD controller will approach the intended value smoothly.
 
 
 ## Running the code
@@ -67,5 +73,5 @@ The main requirement for this project was to achieve that the vehicle can succes
 
 ## Results and Summary
 
-0.229981, 0.000849273, 1.70926
+The PID controller code itself was very easy to write. However, tuning the controller was a big challenge and my current coefficients are probably just a local minimum of all possible parameter sets. Nevertheless the car is able to complete a lap without driving off the road. The controller could probably be improved by using different tuning methods, e.g. the Ziegler–Nichols method.
 
